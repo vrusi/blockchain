@@ -86,6 +86,29 @@ public class HandleTxs {
      */
     public Transaction[] txHandler(Transaction[] possibleTxs)
     {
-        return null;
+        ArrayList<Transaction> txsValid = new ArrayList<>();
+        for (Transaction tx : possibleTxs) {
+            // kontroluje správnosť každej transakcie
+            if (txIsValid(tx)) {
+                txsValid.add(tx);
+            }
+
+            // aktualizuje aktuálny UTXO pool podľa potreby
+            // zmaze povodne utxo
+            for (Transaction.Input input : tx.getInputs()) {
+                UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
+                utxoPoolCurrent.removeUTXO(utxo);
+            }
+
+            // prida nove utxo pre vsetky outputy transakcie
+            for (int output_index = 0 ; output_index < tx.numOutputs(); output_index++) {
+                UTXO utxo = new UTXO(tx.getHash(), output_index);
+                utxoPoolCurrent.addUTXO(utxo, tx.getOutput(output_index));
+            }
+
+        }
+
+        //  vracia pole vzájomne platných prijatých transakcií
+        return txsValid.toArray(new Transaction[0]);
     }
 }
