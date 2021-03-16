@@ -109,6 +109,6 @@ public class HandleTxs {
         }
 
         //  vracia pole vzájomne platných prijatých transakcií
-        return txsValid.toArray(new Transaction[0]);
+        return txsValid.toArray(new Transaction[txsValid.size()]);
     }
 }
