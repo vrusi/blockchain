@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 public class HandleTxs {
 
-    private UTXOPool utxoPoolCurrent;
+    public UTXOPool ledger;
     
     /**
      * Vytvorí verejný ledger, ktorého aktuálny UTXOPool (zbierka nevyčerpaných
@@ -9,7 +9,7 @@ public class HandleTxs {
      * utxoPool pomocou konštruktora UTXOPool (UTXOPool uPool).
      */
     public HandleTxs(UTXOPool utxoPool) {
-      utxoPoolCurrent = new UTXOPool(utxoPool);
+      ledger = new UTXOPool(utxoPool);
     }
 
     /**
@@ -36,26 +36,35 @@ public class HandleTxs {
             Transaction.Input input = tx.getInput(input_index);
 
             UTXO utxoPrev = new UTXO(input.prevTxHash, input.outputIndex);
-            if (utxoPoolCurrent.contains(utxoPrev)) {
+
+            if (!ledger.contains(utxoPrev)) {
+                System.out.println("(1) failed");
                 return false;
             }
+
+            System.out.println("(1) passed");
 
             // (2) podpisy na každom vstupe transakcie sú platné, cize
             // pre vsetky outputy napojene na moje inputy skontroluj podpisy
-            Transaction.Output output = utxoPoolCurrent.getTxOutput(utxoPrev);
+            Transaction.Output output = ledger.getTxOutput(utxoPrev);
             if (!Crypto.verifySignature(output.address,
                                         tx.getRawDataToSign(input_index),
                                         input.signature)) {
+                System.out.println("(2) failed");
                 return false;
             }
+
+            System.out.println("(2) passed");
 
             // (3) žiadne UTXO nie je nárokované viackrát, 
             if (stxos.contains(utxoPrev)) {
+                System.out.println("(3) failed");
                 return false;
-            } else {
-                stxos.add(utxoPrev);
             }
-
+            
+            stxos.add(utxoPrev);
+            System.out.println("(3) passed");
+            
             // (5)
             inputSum += output.value;
         }
@@ -63,29 +72,37 @@ public class HandleTxs {
         // (4) všetky výstupné hodnoty {@code tx}s sú nezáporné
         for (Transaction.Output output : tx.getOutputs()) {
             if (output.value < 0) {
+                System.out.println("(4) failed");
                 return false;
-            } else {    
-                // (5)
-                outputSum += output.value;
-            }
+            } 
+            
+            System.out.println("(4) passed");
 
+            // (5)
+            outputSum += output.value;
+            
             // (5) súčet vstupných hodnôt {@code tx}s je väčší alebo rovný súčtu jej výstupných hodnôt
             if (outputSum > inputSum) {
+                System.out.println("(5) failed");
                 return false;
             }
+
+            System.out.println("(5) passed");
+
         }
 
+        System.out.println("transaction is valid");
         return true;
     }
-
+   
     /**
      * Spracováva každú epochu prijímaním neusporiadaného radu navrhovaných
-     * transakcií, kontroluje správnosť každej transakcie, vracia pole vzájomne 
+     * transakcií, kontroluje správnosť každej transakcie, vracia pole vzájomne
      * platných prijatých transakcií a aktualizuje aktuálny UTXO pool podľa potreby.
      */
-    public Transaction[] txHandler(Transaction[] possibleTxs)
-    {
+    public Transaction[] txHandler(Transaction[] possibleTxs) {
         ArrayList<Transaction> txsValid = new ArrayList<>();
+        
         for (Transaction tx : possibleTxs) {
             // kontroluje správnosť každej transakcie
             if (txIsValid(tx)) {
@@ -93,21 +110,20 @@ public class HandleTxs {
             }
 
             // aktualizuje aktuálny UTXO pool podľa potreby
-            // zmaze vsetky povodne utxo z aktualneho utxo poolu
+            // z inputov transakcie povytahuje UTXOs a zmaze ich z aktualneho UTXO poolu
             for (Transaction.Input input : tx.getInputs()) {
                 UTXO utxoPrev = new UTXO(input.prevTxHash, input.outputIndex);
-                utxoPoolCurrent.removeUTXO(utxoPrev);
+                ledger.removeUTXO(utxoPrev);
             }
 
-            // prida nove utxo pre vsetky outputy transakcie
-            for (int output_index = 0 ; output_index < tx.numOutputs(); output_index++) {
-                UTXO utxo = new UTXO(tx.getHash(), output_index);
-                utxoPoolCurrent.addUTXO(utxo, tx.getOutput(output_index));
+            // vytvori nove UTXOs z outputov transakcie a popridava ich do aktualneho UTXO poolu
+            for (Transaction.Input input : tx.getInputs()) {
+                UTXO utxoPrev = new UTXO(input.prevTxHash, input.outputIndex);
+                ledger.removeUTXO(utxoPrev);
             }
-
         }
 
-        //  vracia pole vzájomne platných prijatých transakcií
+        // vracia pole vzájomne platných prijatých transakcií
         return txsValid.toArray(new Transaction[0]);
     }
 }
