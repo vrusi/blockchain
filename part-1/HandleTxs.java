@@ -29,12 +29,12 @@ public class HandleTxs {
         double inputSum = 0;
         double outputSum = 0;
 
+        int input_index = 0;
+
         // (1) vsetky vystupy narokovane mnou su v aktualnom UTXO poole, cize
         // pre kazdy moj input pozri ci utxo z predoslej transakcie
         // je v mojom utxo poole
-        for (int input_index = 0; input_index < tx.numInputs(); input_index++) {
-            Transaction.Input input = tx.getInput(input_index);
-
+        for (Transaction.Input input : tx.getInputs()) {
             UTXO utxoPrev = new UTXO(input.prevTxHash, input.outputIndex);
 
             if (!ledger.contains(utxoPrev)) {
@@ -48,7 +48,7 @@ public class HandleTxs {
             // pre vsetky outputy napojene na moje inputy skontroluj podpisy
             Transaction.Output output = ledger.getTxOutput(utxoPrev);
             if (!Crypto.verifySignature(output.address,
-                                        tx.getRawDataToSign(input_index),
+                                        tx.getRawDataToSign(input_index++),
                                         input.signature)) {
                 System.out.println("(2) failed");
                 return false;
