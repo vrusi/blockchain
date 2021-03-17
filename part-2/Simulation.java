@@ -84,7 +84,7 @@ public class Simulation {
          HashMap<Integer, Set<Candidate>> allProposals = new HashMap<>();
 
          for (int i = 0; i < numNodes; i++) {
-            Set<Transaction> proposals = nodes[i].sendToFollowers();
+            Set<Transaction> proposals = nodes[i].followersSend();
             for (Transaction tx : proposals) {
                if (!validTxIds.contains(tx.id))
                   continue; // skontroluje, aby každá tx bola skutočne platná
@@ -108,13 +108,13 @@ public class Simulation {
          // Distribuuje návrhy k ich zamýšľaným príjemcom ako kandidátom
          for (int i = 0; i < numNodes; i++) {
             if (allProposals.containsKey(i))
-               nodes[i].receiveFromFollowees(allProposals.get(i));
+               nodes[i].followeesReceive(allProposals.get(i));
          }
       }
 
       // vypíš výsledky
       for (int i = 0; i < numNodes; i++) {
-         Set<Transaction> transactions = nodes[i].sendToFollowers();
+         Set<Transaction> transactions = nodes[i].followersSend();
          System.out.println("Transaction ids that Node " + i + " believes consensus on:");
          for (Transaction tx : transactions)
             System.out.println(tx.id);
