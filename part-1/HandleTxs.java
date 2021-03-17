@@ -105,9 +105,11 @@ public class HandleTxs {
         
         for (Transaction tx : possibleTxs) {
             // kontroluje správnosť každej transakcie
-            if (txIsValid(tx)) {
-                txsValid.add(tx);
+            if (!txIsValid(tx)) {
+                continue;
             }
+            
+            txsValid.add(tx);
 
             // aktualizuje aktuálny UTXO pool podľa potreby
             // z inputov transakcie povytahuje UTXOs a zmaze ich z aktualneho UTXO poolu
