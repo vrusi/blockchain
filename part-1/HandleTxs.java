@@ -22,8 +22,8 @@ public class HandleTxs {
      *     výstupných hodnôt; a false inak.
      */
     public boolean txIsValid(Transaction tx) {
-        // na kontrolu (3)
-        ArrayList<UTXO> UTXOsSpent = new ArrayList<>();
+        // na kontrolu (3) (spent transaction outputs)
+        ArrayList<UTXO> stxos = new ArrayList<>();
 
         // na kontrolu (5)
         double inputSum = 0;
@@ -35,14 +35,14 @@ public class HandleTxs {
         for (int input_index = 0; input_index < tx.numInputs(); input_index++) {
             Transaction.Input input = tx.getInput(input_index);
 
-            UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
-            if (utxoPoolCurrent.contains(utxo)) {
+            UTXO utxoPrev = new UTXO(input.prevTxHash, input.outputIndex);
+            if (utxoPoolCurrent.contains(utxoPrev)) {
                 return false;
             }
 
             // (2) podpisy na každom vstupe transakcie sú platné, cize
             // pre vsetky outputy napojene na moje inputy skontroluj podpisy
-            Transaction.Output output = utxoPoolCurrent.getTxOutput(utxo);
+            Transaction.Output output = utxoPoolCurrent.getTxOutput(utxoPrev);
             if (!Crypto.verifySignature(output.address,
                                         tx.getRawDataToSign(input_index),
                                         input.signature)) {
@@ -50,10 +50,10 @@ public class HandleTxs {
             }
 
             // (3) žiadne UTXO nie je nárokované viackrát, 
-            if (UTXOsSpent.contains(utxo)) {
+            if (stxos.contains(utxoPrev)) {
                 return false;
             } else {
-                UTXOsSpent.add(utxo);
+                stxos.add(utxoPrev);
             }
 
             // (5)
@@ -64,8 +64,7 @@ public class HandleTxs {
         for (Transaction.Output output : tx.getOutputs()) {
             if (output.value < 0) {
                 return false;
-            } else {
-
+            } else {    
                 // (5)
                 outputSum += output.value;
             }
@@ -94,10 +93,10 @@ public class HandleTxs {
             }
 
             // aktualizuje aktuálny UTXO pool podľa potreby
-            // zmaze povodne utxo
+            // zmaze vsetky povodne utxo z aktualneho utxo poolu
             for (Transaction.Input input : tx.getInputs()) {
-                UTXO utxo = new UTXO(input.prevTxHash, input.outputIndex);
-                utxoPoolCurrent.removeUTXO(utxo);
+                UTXO utxoPrev = new UTXO(input.prevTxHash, input.outputIndex);
+                utxoPoolCurrent.removeUTXO(utxoPrev);
             }
 
             // prida nove utxo pre vsetky outputy transakcie
@@ -109,6 +108,6 @@ public class HandleTxs {
         }
 
         //  vracia pole vzájomne platných prijatých transakcií
-        return txsValid.toArray(new Transaction[txsValid.size()]);
+        return txsValid.toArray(new Transaction[0]);
     }
 }
