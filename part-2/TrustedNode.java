@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -79,7 +78,7 @@ public class TrustedNode implements Node {
             // ak ja nenasledujem uzol tak nic s nim nerobim
             if (!isFollowee(node_index)) {
                 continue;
-                // ak uzol nasledujem ale nic mi neposlal, tak ho oznacim za nedoveryhodny
+            // ak uzol nasledujem ale nic mi neposlal, tak ho oznacim za nedoveryhodny
             } else if (!senders.contains(node_index)) {
                 setFlag(node_index, true);
             }
