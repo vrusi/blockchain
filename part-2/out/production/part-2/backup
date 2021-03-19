@@ -70,9 +70,8 @@ public class TrustedNode implements Node {
     public void followeesReceive(Set<Candidate> candidates) {
         // skodlivy uzol moze byt followee ktory mi neposle transakcie,
         // pripadne mi ich posle ale neprijme odo mna
-        // takze treba pozriet:
-        // 1. ci sender je aj follower - ale nepoznam svojich followerov,
-        // 2. a ci je medzi sendermi kazdy moj followee - toto jedine viem urobit
+        // takze treba pozriet ci sender je aj follower - ale nepoznam svojich followerov,
+        // a ci je medzi sendermi kazdy moj followee
         Set<Integer> senders = candidates.stream().map(candidate -> candidate.sender).collect(Collectors.toSet());
 
         for (int node_index = 0; node_index < followees.length; node_index++) {
