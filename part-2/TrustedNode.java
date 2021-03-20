@@ -59,8 +59,7 @@ public class TrustedNode implements Node {
         this.flaggedNodes.set(node_index, value);
     }
 
-    /** príjmi kandidátov z iných uzlov */
-    /**
+    /** príjmi kandidátov z iných uzlov
      * treba tu ocheckovat ci mi neposiela skodlivy uzol, ktory moze:
      *  (1) byť funkčne mŕtvy a nikdy v skutočnosti nevysielať žiadne transakcie,
      *  (2) neustále vysielat svoju vlastnú skupinu transakcií a nikdy neprijímat transakcie, ktoré sú mu dané,
@@ -70,8 +69,8 @@ public class TrustedNode implements Node {
         // skodlivy uzol moze byt followee ktory mi neposle transakcie,
         // pripadne mi ich posle ale neprijme odo mna
         // takze treba pozriet:
-        // 1. ci sender je aj follower - ale nepoznam svojich followerov,
-        // 2. a ci je medzi sendermi kazdy moj followee - toto jedine viem urobit
+        // 1. ci sender prijima transakcie - co vsak nemam ako zistit,
+        // 2. a ci kazdy koho followujem je medzi sendermi
         Set<Integer> senders = candidates.stream().map(candidate -> candidate.sender).collect(Collectors.toSet());
 
         for (int node_index = 0; node_index < followees.length; node_index++) {
