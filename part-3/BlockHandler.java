@@ -1,11 +1,11 @@
 
 import java.security.PublicKey;
 
-public class HandleBlocks {
-    private Blockchain blockChain;
+public class BlockHandler {
+    private BlockChain blockChain;
 
     /** Predpokladajme, že blockchain má Genesis blok */
-    public HandleBlocks(Blockchain blockChain) {
+    public BlockHandler(BlockChain blockChain) {
         this.blockChain = blockChain;
     }
 
@@ -27,9 +27,9 @@ public class HandleBlocks {
         Block current = new Block(parentHash, myAddress);
         UTXOPool uPool = blockChain.getMaxHeightUTXOPool();
         TransactionPool txPool = blockChain.getTransactionPool();
-        TxHandler handler = new TxHandler(uPool);
+        HandleTxs handler = new HandleTxs(uPool);
         Transaction[] txs = txPool.getTransactions().toArray(new Transaction[0]);
-        Transaction[] rTxs = handler.handleTxs(txs);
+        Transaction[] rTxs = handler.txHandler(txs);
         for (int i = 0; i < rTxs.length; i++)
             current.transactionAdd(rTxs[i]);
 
