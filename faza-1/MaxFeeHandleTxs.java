@@ -125,7 +125,7 @@ public class MaxFeeHandleTxs {
         // najdem maximalny poplatok
         double maxFee = 0;
         for (Transaction tx : possibleTxs) {
-            if (!isValidTx(tx)) {
+            if (!txIsValid(tx)) {
                 continue;
             }
 
@@ -137,7 +137,7 @@ public class MaxFeeHandleTxs {
 
         // pridaj vsecky transakcie co maju ten max poplatok do arrayu
         for (Transaction tx : possibleTxs) {
-            if (isValidTx(tx) && (getTxFee(tx) == maxFee)) {
+            if (txIsValid(tx) && (getTxFee(tx) == maxFee)) {
                 maxFeeTxs.add(tx);
             }
         }

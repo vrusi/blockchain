@@ -47,7 +47,7 @@ public class HandleTxs {
             // (2) podpisy na každom vstupe transakcie sú platné, cize
             // pre vsetky outputy napojene na moje inputy skontroluj podpisy
             Transaction.Output output = this.ledger.getTxOutput(utxoPrev);
-            bool isVerified = Crypto.verifySignature(output.address, tx.getRawDataToSign(input_index++), input.signature);
+            boolean isVerified = Crypto.verifySignature(output.address, tx.getRawDataToSign(input_index++), input.signature);
             if (!isVerified) {
                 System.out.println("(2) failed");
                 return false;
